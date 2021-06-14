@@ -2,7 +2,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/pcl_visualizer.h>
-
+#include "../include/cal_calibration.h"
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
@@ -33,24 +33,53 @@ pp_callback(const pcl::visualization::PointPickingEvent& event, void* args)
 	std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
 }
 
-void main()
+void read_pcds_xyz(const std::string & dir, const int & frame_num, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
-	std::string filename("bunny.pcd");
-	//visualizer
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
-	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("viewer"));
+	intptr_t handle;  
+	struct _finddata_t fileinfo;
+	std::string p;
+	handle = _findfirst(p.append(dir).append("/*.pcd").c_str(), &fileinfo);
+	if (handle == -1) {
+		return;
+		std::cout << "handle == -1" << std::endl;
+	}
+	std::vector<std::string> files;
 
+	do
+	{
+		printf("%s\n", fileinfo.name);
+		files.push_back(p.assign(dir).append("/").append(fileinfo.name));
+	} while (!_findnext(handle, &fileinfo));
+	_findclose(handle);
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	for (int frame = 0; frame < frame_num; frame++)
+	{
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_frame(new pcl::PointCloud<pcl::PointXYZ>);
+		if (pcl::io::loadPCDFile<pcl::PointXYZ>(files[frame].c_str(), *cloud_frame) == -1) {
+			std::cout << "Couldn't read file" << "\n";
+		}
+		else {
+			*cloud += *cloud_frame;
+		}
+	}
+}
+
+void read_pcd(const char * filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) 
+{
 	if (pcl::io::loadPCDFile(filename, *cloud))
 	{
 		std::cerr << "ERROR: Cannot open file " << filename << "! Aborting..." << std::endl;
 		return;
 	}
 	std::cout << cloud->points.size() << std::endl;
+}
 
-	//viewer->addPointCloud(cloud, "bunny");
+void interact_visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) 
+{
+	//visualizer
+	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("viewer"));
 
 	cloud_mutex.lock();    // for not overwriting the point cloud
-
 	// Display pointcloud:
 	viewer->addPointCloud(cloud, "bunny");
 	viewer->setCameraPosition(0, 0, -2, 0, -1, 0, 0);
@@ -74,4 +103,14 @@ void main()
 		viewer->spinOnce(100);
 		boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 	}
+}
+
+
+void main()
+{
+	/*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	read_pcds_xyz("../pcds/", 10, cloud);
+	interact_visualize(cloud);*/
+	
+	cal_calib();
 }
