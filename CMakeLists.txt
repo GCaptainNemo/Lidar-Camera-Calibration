@@ -9,21 +9,20 @@ find_package(PCL REQUIRED)
 # OpenCV
 find_package(OpenCV REQUIRED)
 
-MESSAGE(STATUS "Project: SERVER") 
-
-
 include_directories(
-${PROJECT_SOURCE_DIR}/include/
 ${PCL_INCLUDE_DIRS}
 ${OpenCV_INCLUDE_DIRS}
 )
 
-set(SRC 
-${PROJECT_SOURCE_DIR} ./src/main.cpp
-${PROJECT_SOURCE_DIR} ./src/cal_extrinsic.cpp
+file(GLOB_RECURSE DIR_SRCS    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE DIR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+
+
+add_executable(${PROJECT_NAME} 
+${DIR_SRCS}    
+${DIR_HEADERS}
 )
 
-add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} 
 ${PCL_LIBRARIES}
 ${OpenCV_LIBRARIES}
