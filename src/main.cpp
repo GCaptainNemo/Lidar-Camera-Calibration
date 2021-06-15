@@ -110,7 +110,7 @@ void main()
 {
 	/*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	read_pcds_xyz("../pcds/", 10, cloud);
-	interact_visualize(cloud);*/
-	
+	interact_visualize(cloud);
+	*/
 	cal_calib();
 }
