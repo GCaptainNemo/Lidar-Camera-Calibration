@@ -20,14 +20,18 @@ Livox Horizon 激光雷达 + Hikvision 相机
 
 4. 使用lvx_parser文件夹下的pylvx.py脚本将lvx文件转成pcd文件。
 
-5. 将多帧点云合成一帧(read_pcds_xyz函数)，然后分别进行点云特征点(interact_visualize函数)和图像对应特征点(Matlab)的提取。
+5. 将多帧点云合成一帧(read_pcds_xyz函数)，然后分别进行点云特征点(interact_visualize函数)和图像对应特征点(Matlab)的提取，转换成一个
+已知相机内参、三维点及对应投影点情况下计算相机位姿的PnP(Perspective-n-Point)问题。
 
     ![标定](./resources/calibration.jpg)
 
-6. 然后用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解。
+6. 用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解。
 
 ## 四、资源及参考资料
 
-[1] [内参标定板](](./resources/chess_board.png))
+[1] [内参标定板](./resources/chess_board.png)
 
 [2] [livox-官方标定方法](https://github.com/Livox-SDK/livox_camera_lidar_calibration)
+
+[3] [Opencv SolvePNP API introduction](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#bool%20solvePnP)
+
