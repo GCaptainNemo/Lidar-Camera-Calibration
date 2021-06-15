@@ -33,6 +33,15 @@ pp_callback(const pcl::visualization::PointPickingEvent& event, void* args)
 	std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
 }
 
+void read_pcd_xyzrgb(const char * file_dir, pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud) 
+{
+	
+	if (pcl::io::loadPCDFile<pcl::PointXYZRGB>(file_dir, *rgb_cloud) == -1) 
+	{
+		std::cout << "cant load file" << std::endl;
+	}
+}
+
 void read_pcds_xyz(const std::string & dir, const int & frame_num, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
 	intptr_t handle;  
@@ -55,6 +64,7 @@ void read_pcds_xyz(const std::string & dir, const int & frame_num, pcl::PointClo
 	for (int frame = 0; frame < frame_num; frame++)
 	{
 		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_frame(new pcl::PointCloud<pcl::PointXYZ>);
+		
 		if (pcl::io::loadPCDFile<pcl::PointXYZ>(files[frame].c_str(), *cloud_frame) == -1) {
 			std::cout << "Couldn't read file" << "\n";
 		}
@@ -74,7 +84,8 @@ void read_pcd(const char * filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 	std::cout << cloud->points.size() << std::endl;
 }
 
-void interact_visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) 
+template <class T>
+void interact_visualize(T cloud)
 {
 	//visualizer
 	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("viewer"));
@@ -108,9 +119,10 @@ void interact_visualize(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 
 void main()
 {
-	/*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	read_pcds_xyz("../pcds/", 10, cloud);
-	interact_visualize(cloud);
-	*/
-	cal_calib();
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+	read_pcd_xyzrgb("../pcds/color_pc.pcd", rgb_cloud);
+	interact_visualize(rgb_cloud);
+	
+	//cal_calib();
 }
