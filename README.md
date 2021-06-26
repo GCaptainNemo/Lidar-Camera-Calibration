@@ -8,11 +8,11 @@ Livox Horizon 激光雷达 + Hikvision 相机
 ## 三、介绍
 激光雷达和相机之间标定需要标定相机的内参、畸变系数，和相机相对于激光雷达的位姿。具体步骤如下所示：
 
-1. 相机内参和畸变系数用张正友标定法，通过Matlab或者Opencv等标定工具得到。
+1. 用张正友标定法标定相机内参和畸变系数，通过Matlab或者OpenCV等标定工具得到(cal_extrinsic.cpp中calib::zhang_zhengyou_calib函数)，实验中OpenCV的重投影精度比MatLab配准工具箱要小。
     
     ![相机内参和畸变系数标定](./resources/intrinsic.jpg)
 
-2. 点云不含纹理信息，因此没法用标定板格子的角点进行外参标定，这里选择简单的一块铁板在较开阔的地区进行标定。
+2. 点云不含纹理信息，因此不能用角点进行外参标定，这里用一块铁板在开阔的地区进行标定。
 
     ![外参标定板](./resources/2_1.bmp)
 
@@ -35,3 +35,4 @@ Livox Horizon 激光雷达 + Hikvision 相机
 
 [3] [Opencv SolvePNP API introduction](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#bool%20solvePnP)
 
+[4] [OpenCV 张正友标定法](https://blog.csdn.net/dcrmg/article/details/52929669)

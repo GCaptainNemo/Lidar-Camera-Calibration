@@ -54,12 +54,13 @@ namespace calib {
 
 	void zhang_zhengyou_calib(const char * folder_address) 
 	{
-		std::vector<cv::Point2f> image_points_buf;  
-
+		std::vector<std::vector<cv::Point2f>> img_points_seq;
+		  
 		std::vector<std::string> files_vec;
 		calib::getFileNames(folder_address, files_vec);
 		std::cout << "files_vec.shape = " << files_vec.size() << std::endl;
-		cv::Size board_size(6, 8);
+		cv::Size image_size;
+		cv::Size board_size(6, 8); // chessboard corner nums
 		for (auto file = files_vec.begin(); file != files_vec.end(); ++file)
 		{
 			std::cout << *file << std::endl;
@@ -67,25 +68,98 @@ namespace calib {
 			cv::Mat gray_img;
 			cv::cvtColor(origin_img, gray_img, cv::COLOR_RGB2GRAY);
 			cv::Mat out_img;
+			
 			// 
-			if (0 == findChessboardCorners(origin_img, board_size, image_points_buf))
+			std::vector<cv::Point2f> img_points_buf;
+			if (findChessboardCorners(origin_img, board_size, img_points_buf) == 0)
 			{
 				std::cout << "can not find chessboard corners!\n"; //找不到角点
 				exit(1);
 			}
 			else {
 				std::cout << "success!" << std::endl;
+				cv::Mat view_gray;
+				cv::cvtColor(origin_img, view_gray, cv::COLOR_RGB2GRAY);
+				cv::find4QuadCornerSubpix(view_gray, img_points_buf, cv::Size(11, 11)); //对粗提取的角点进行精确化
+				img_points_seq.push_back(img_points_buf);
+				cv::drawChessboardCorners(view_gray, board_size, img_points_buf, true); //在图片中标记角点
+				cv::namedWindow("Camera Calibration", cv::WINDOW_NORMAL);
+				cv::imshow("Camera Calibration", view_gray);//显示图片
+				cv::waitKey(1000);//暂停0.5S		
+				image_size.width = view_gray.cols;
+				image_size.height = view_gray.rows;
 			}
-			//cv::cornerHarris(gray_img, out_img, 10, 3, 0.1);
-			//cv::Mat harrisCorner;
-			//// binarize
-			//cv::threshold(out_img, harrisCorner, 0.00001, 255, cv::THRESH_BINARY);
-			//cv::namedWindow("image", cv::WINDOW_NORMAL);
-			//cv::imshow("image", harrisCorner);
-			//cv::imshow("image", gray_img);
+			
+		}
+		
+		std::cout << img_points_seq.size() << std::endl;
+		
+		std::cout << "开始标定………………";
+		/*棋盘三维信息*/
+		cv::Size square_size(2.44, 2.44);  /* 实际测量得到的标定板上每个棋盘格的大小 */
+		std::vector<std::vector<cv::Point3f>> object_points; /* 保存标定板上角点的三维坐标 */
+		/*内外参数*/
+		cv::Mat intrinsic_mat(3, 3, CV_32FC1, cv::Scalar::all(0)); /* 摄像机内参数矩阵 */
+		std::vector<int> point_counts;  // 每幅图像中角点的数量
+		cv::Mat distCoeffs(1, 5, CV_32FC1, cv::Scalar::all(0)); /* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
+		std::vector<cv::Mat> tvecsMat;  /* 每幅图像的旋转向量 */
+		std::vector<cv::Mat> rvecsMat; /* 每幅图像的平移向量 */
+		/* 初始化标定板上角点的三维坐标 */
+		int i, j, t;
+		int img_count = img_points_seq.size();
+		for (t = 0; t < img_count; t++)
+		{
+			std::vector<cv::Point3f> tempPointSet;
+			for (i = 0; i < board_size.height; i++)
+			{
+				for (j = 0; j < board_size.width; j++)
+				{
+					cv::Point3f realPoint;
+					/* 假设标定板放在世界坐标系中z=0的平面上 */
+					realPoint.x = i * square_size.width;
+					realPoint.y = j * square_size.height;
+					realPoint.z = 0;
+					tempPointSet.push_back(realPoint);
+				}
+			}
+			object_points.push_back(tempPointSet);
 		}
 
-
+		/* 初始化每幅图像中的角点数量，假定每幅图像中都可以看到完整的标定板 */
+		for (i = 0; i < img_count; i++)
+		{
+			point_counts.push_back(board_size.width * board_size.height);
+		}
+		/* 开始标定 */
+		cv::calibrateCamera(object_points, img_points_seq, image_size, intrinsic_mat, distCoeffs, rvecsMat, tvecsMat, 0);
+		std::cout << "标定完成！\n";
+		//对标定结果进行评价
+		std::cout << "开始评价标定结果………………\n";
+		double total_err = 0.0; /* 所有图像的平均误差的总和 */
+		double err = 0.0; /* 每幅图像的平均误差 */
+		std::vector<cv::Point2f> image_points2; /* 保存重新计算得到的投影点 */
+		std::cout << "每幅图像的标定误差：\n";
+		for (i = 0; i < img_count; i++)
+		{
+			std::vector<cv::Point3f> tempPointSet = object_points[i];
+			/* 通过得到的摄像机内外参数，对空间的三维点进行重新投影计算，得到新的投影点 */
+			projectPoints(tempPointSet, rvecsMat[i], tvecsMat[i], intrinsic_mat, distCoeffs, image_points2);
+			/* 计算新的投影点和旧的投影点之间的误差*/
+			std::vector<cv::Point2f> tempImagePoint = img_points_seq[i];
+			cv::Mat tempImagePointMat(1, tempImagePoint.size(), CV_32FC2);
+			cv::Mat image_points2Mat(1, image_points2.size(), CV_32FC2);
+			for (int j = 0; j < tempImagePoint.size(); j++)
+			{
+				image_points2Mat.at<cv::Vec2f>(0, j) = cv::Vec2f(image_points2[j].x, image_points2[j].y);
+				tempImagePointMat.at<cv::Vec2f>(0, j) = cv::Vec2f(tempImagePoint[j].x, tempImagePoint[j].y);
+			}
+			err = norm(image_points2Mat, tempImagePointMat, cv::NORM_L2);
+			total_err += err /= point_counts[i];
+			std::cout << "第" << i + 1 << "幅图像的平均误差：" << err << "像素" << std::endl;
+		}
+		std::cout << "总体平均误差：" << total_err / img_count << "像素" << std::endl;
+		std::cout << "评价完成！" << std::endl;
+		std::cout << "intrinsic matrix = " << intrinsic_mat << std::endl;
 		
 	};
 
