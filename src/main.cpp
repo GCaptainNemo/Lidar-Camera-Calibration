@@ -121,7 +121,7 @@ void main()
 {
 	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-	read_pcd_xyzrgb("../pcds/color_pc.pcd", rgb_cloud);
+	read_pcd_xyzrgb("../pcds/color_pc_2d.pcd", rgb_cloud);
 	interact_visualize(rgb_cloud);
 	
 	//cal_calib();
