@@ -120,9 +120,10 @@ void interact_visualize(T cloud)
 void main()
 {
 	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+	/*pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 	read_pcd_xyzrgb("../pcds/color_pc_2d.pcd", rgb_cloud);
 	interact_visualize(rgb_cloud);
-	
-	//calib::cal_calib();
+	*/
+	calib::zhang_zhengyou_calib("D:/pg_cpp/calibration/imgs/20210613");
+	//calib::cal_extrinsic_par();
 }
