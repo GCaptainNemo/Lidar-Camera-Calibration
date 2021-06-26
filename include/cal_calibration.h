@@ -1,3 +1,5 @@
 
 #include <opencv2/opencv.hpp>
-void cal_calib();
+namespace calib {
+	void cal_calib();
+}

@@ -124,5 +124,5 @@ void main()
 	read_pcd_xyzrgb("../pcds/color_pc_2d.pcd", rgb_cloud);
 	interact_visualize(rgb_cloud);
 	
-	//cal_calib();
+	//calib::cal_calib();
 }
