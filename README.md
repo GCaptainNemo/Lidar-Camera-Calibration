@@ -9,21 +9,31 @@ Livox Horizon 激光雷达 + Hikvision 相机
 激光雷达和相机之间标定需要标定相机的内参、畸变系数，和相机相对于激光雷达的位姿。具体步骤如下所示：
 
 1. 用张正友标定法标定相机内参和畸变系数，通过Matlab或者OpenCV等标定工具得到(cal_extrinsic.cpp中calib::zhang_zhengyou_calib函数)，实验中OpenCV的重投影精度比MatLab配准工具箱要小。
-    
-    ![相机内参和畸变系数标定](./resources/intrinsic.jpg)
+   
+    <p align="center"><img src=./resources/intrinsic.jpg width=50%></p>
 
+   <h6 align="center">张正友标定法</h6>
+   
+   
+   
 2. 点云不含纹理信息，因此不能用角点进行外参标定，这里用一块铁板在开阔的地区进行标定。
 
-    ![外参标定板](./resources/2_1.bmp)
+    <p align=”center“><img src=./resources/2_1.bmp width=50%></p>
+
+    <h6 align="center">外参标定板</h6>
 
 3. 使用livox-viewer录制点云流数据(.lvx文件)和用OpenCV抓图。
 
 4. 使用lvx_parser文件夹下的pylvx.py脚本将lvx文件转成pcd文件。
 
 5. 将多帧点云合成一帧(read_pcds_xyz函数)，然后分别进行点云特征点(interact_visualize函数)和图像对应特征点(Matlab)的提取，转换成一个
-已知相机内参、三维点及对应投影点情况下计算相机位姿的PnP(Perspective-n-Point)问题。
+  已知相机内参、三维点及对应投影点情况下计算相机位姿的PnP(Perspective-n-Point)问题。
 
-    ![标定](./resources/calibration.jpg)
+  <p align='center'><img src="./resources/calibration.jpg" width=75%></p>
+
+  <h6 align="center">交互提取角点</h6>
+
+  
 
 6. 用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解。
 
