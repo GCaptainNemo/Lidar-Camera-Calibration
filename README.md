@@ -18,7 +18,7 @@ Livox Horizon 激光雷达 + Hikvision 相机
    
 2. 点云不含纹理信息，因此不能用角点进行外参标定，这里用一块铁板在开阔的地区进行标定。
 
-    <p align=”center“><img src=./resources/2_1.bmp width=50%></p>
+    <p align='center'><img src=./resources/2_1.bmp width=50%></p>
 
     <h6 align="center">外参标定板</h6>
 
