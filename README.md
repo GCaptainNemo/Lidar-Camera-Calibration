@@ -46,3 +46,5 @@ Livox Horizon 激光雷达 + Hikvision 相机
 [3] [Opencv SolvePNP API introduction](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#bool%20solvePnP)
 
 [4] [OpenCV 张正友标定法](https://blog.csdn.net/dcrmg/article/details/52929669)
+
+[5] [livox-viewer 手动标定外参](https://github.com/Livox-SDK/Livox-SDK/wiki/Calibrate-extrinsic-and-display-under-ros-cn)
