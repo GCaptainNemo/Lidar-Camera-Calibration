@@ -1,6 +1,16 @@
 # 激光雷达和相机标定
-## 一、依赖库
-PCL + OpenCV
+## 一、环境与依赖
+* 环境
+
+  WINDOWS:
+  ./src 与./include下的脚本
+
+  ubuntu ROS:
+  ./ROS 下是对图像流进行截图(snapShot.cpp)和交互提取特征点(show_coordinate)的节点脚本
+
+* 依赖
+  `PCL`, `OpenCV`
+
 
 ## 二、硬件
 Livox Horizon 激光雷达 + Hikvision 相机
@@ -27,7 +37,7 @@ Livox Horizon 激光雷达 + Hikvision 相机
 4. 使用lvx_parser文件夹下的pylvx.py脚本将lvx文件转成pcd文件。
 
 5. 将多帧点云合成一帧(read_pcds_xyz函数)，然后分别进行点云特征点(interact_visualize函数)和图像对应特征点(Matlab)的提取，转换成一个
-  已知相机内参、三维点及对应投影点情况下计算相机位姿的PnP(Perspective-n-Point)问题。
+    已知相机内参、三维点及对应投影点情况下计算相机位姿的PnP(Perspective-n-Point)问题。
 
   <p align='center'><img src="./resources/calibration.jpg" width=75%></p>
 
