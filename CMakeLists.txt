@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.3.1)
 set(CMAKE_CXX_FLAGS "-std=c++11")
-set(CMAKE_CXX_FLAGS "/EHsc ${CMAKE_CXX_FLAGS}")
 
 PROJECT("calibration")
 
@@ -14,7 +13,11 @@ ${PCL_INCLUDE_DIRS}
 ${OpenCV_INCLUDE_DIRS}
 )
 
-file(GLOB_RECURSE DIR_SRCS    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+#add_library(lidar_visualize STATIC src/lidar_visualize.hpp)
+#set_target_properties(lidar_visualize  PROPERTIES LINKER_LANGUAGE C++)
+
+
+file(GLOB_RECURSE DIR_SRCS    ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE DIR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 
@@ -23,7 +26,9 @@ ${DIR_SRCS}
 ${DIR_HEADERS}
 )
 
+
 target_link_libraries(${PROJECT_NAME} 
 ${PCL_LIBRARIES}
 ${OpenCV_LIBRARIES}
+#lidar_visualize
 )

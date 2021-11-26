@@ -1,129 +1,19 @@
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/visualization/pcl_visualizer.h>
+#include "lidar_visualize.hpp"
 #include "../include/cal_calibration.h"
 
-typedef pcl::PointXYZRGBA PointT;
-typedef pcl::PointCloud<PointT> PointCloudT;
 
-// Mutex: //
-boost::mutex cloud_mutex;
-
-struct callback_args {
-	// structure used to pass arguments to the callback function
-	PointCloudT::Ptr clicked_points_3d;
-	pcl::visualization::PCLVisualizer::Ptr viewerPtr;
-};
-
-void
-pp_callback(const pcl::visualization::PointPickingEvent& event, void* args)
+int main(int argc, char **argv)
 {
-	struct callback_args* data = (struct callback_args *)args;
-	if (event.getPointIndex() == -1)
-		return;
-	PointT current_point;
-	event.getPoint(current_point.x, current_point.y, current_point.z);
-	data->clicked_points_3d->points.push_back(current_point);
-	// Draw clicked points in red:
-	pcl::visualization::PointCloudColorHandlerCustom<PointT> red(data->clicked_points_3d, 255, 0, 0);
-	data->viewerPtr->removePointCloud("clicked_points");
-	data->viewerPtr->addPointCloud(data->clicked_points_3d, red, "clicked_points");
-	data->viewerPtr->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
-	std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
-}
-
-void read_pcd_xyzrgb(const char * file_dir, pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud) 
-{
+	if (argc != 2){std::cout << "require to enter file name!!"; return -1;}
+	std::string file_dir = std::string("../pcds/") + std::string(argv[1]);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	// pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::PointCloud<pcl::PointXYZI>::Ptr xyzi_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+	read_pcd_template<pcl::PointCloud<pcl::PointXYZI>, pcl::PointXYZI>(file_dir.c_str(), *xyzi_cloud);
+	pcl::copyPointCloud(*xyzi_cloud, *cloud);
+	interact_visualize(cloud);
 	
-	if (pcl::io::loadPCDFile<pcl::PointXYZRGB>(file_dir, *rgb_cloud) == -1) 
-	{
-		std::cout << "cant load file" << std::endl;
-	}
-}
-
-void read_pcds_xyz(const std::string & dir, const int & frame_num, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
-{
-	intptr_t handle;  
-	struct _finddata_t fileinfo;
-	std::string p;
-	handle = _findfirst(p.append(dir).append("/*.pcd").c_str(), &fileinfo);
-	if (handle == -1) {
-		return;
-		std::cout << "handle == -1" << std::endl;
-	}
-	std::vector<std::string> files;
-
-	do
-	{
-		printf("%s\n", fileinfo.name);
-		files.push_back(p.assign(dir).append("/").append(fileinfo.name));
-	} while (!_findnext(handle, &fileinfo));
-	_findclose(handle);
-	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	for (int frame = 0; frame < frame_num; frame++)
-	{
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_frame(new pcl::PointCloud<pcl::PointXYZ>);
-		
-		if (pcl::io::loadPCDFile<pcl::PointXYZ>(files[frame].c_str(), *cloud_frame) == -1) {
-			std::cout << "Couldn't read file" << "\n";
-		}
-		else {
-			*cloud += *cloud_frame;
-		}
-	}
-}
-
-void read_pcd(const char * filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) 
-{
-	if (pcl::io::loadPCDFile(filename, *cloud))
-	{
-		std::cerr << "ERROR: Cannot open file " << filename << "! Aborting..." << std::endl;
-		return;
-	}
-	std::cout << cloud->points.size() << std::endl;
-}
-
-template <class T>
-void interact_visualize(T cloud)
-{
-	//visualizer
-	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("viewer"));
-
-	cloud_mutex.lock();    // for not overwriting the point cloud
-	// Display pointcloud:
-	viewer->addPointCloud(cloud, "bunny");
-	viewer->setCameraPosition(0, 0, -2, 0, -1, 0, 0);
-
-	// Add point picking callback to viewer:
-	struct callback_args cb_args;
-	PointCloudT::Ptr clicked_points_3d(new PointCloudT);
-	cb_args.clicked_points_3d = clicked_points_3d;
-	cb_args.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(viewer);
-	viewer->registerPointPickingCallback(pp_callback, (void*)&cb_args);
-	std::cout << "Shift+click on three floor points, then press 'Q'..." << std::endl;
-
-	// Spin until 'Q' is pressed:
-	viewer->spin();
-	std::cout << "done." << std::endl;
-
-	cloud_mutex.unlock();
-
-	while (!viewer->wasStopped())
-	{
-		viewer->spinOnce(100);
-		boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-	}
-}
-
-
-void main()
-{
-	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	/*pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-	read_pcd_xyzrgb("../pcds/color_pc_2d.pcd", rgb_cloud);
-	interact_visualize(rgb_cloud);
-	*/
-	calib::zhang_zhengyou_calib("D:/pg_cpp/calibration/imgs/20210613");
+	// calib::zhang_zhengyou_calib("D:/pg_cpp/calibration/imgs/20210613");
 	//calib::cal_extrinsic_par();
+	return 0;
 }
