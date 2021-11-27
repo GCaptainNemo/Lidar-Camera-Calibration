@@ -16,7 +16,7 @@
 Livox Horizon 激光雷达 + Hikvision 相机
 
 ## 三、介绍
-激光雷达和相机之间标定需要标定相机的内参、畸变系数，和相机相对于激光雷达的位姿。具体步骤如下所示：
+激光雷达和相机之间标定需要标定相机的内参、畸变系数，和相机相对于激光雷达的位姿。下面是一种先标定相机内参、畸变系数；在矫正图像后，再手动提取角点进行3D-2D匹配的标定方法，具体步骤如下所示：
 
 1. 用张正友标定法标定相机内参和畸变系数，通过Matlab或者OpenCV等标定工具得到(cal_extrinsic.cpp中calib::zhang_zhengyou_calib函数)，实验中OpenCV的重投影精度比MatLab配准工具箱要小。
    
@@ -47,7 +47,9 @@ Livox Horizon 激光雷达 + Hikvision 相机
 
 6. 用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解。
 
-## 四、资源及参考资料
+**注意：**除了以上基本的手动3D-2D激光雷达配准算法外，业界还探究了许多(半)自动式配准算法，见[笔记](./docs/Lidar-camera-calibration.ipynb)
+
+## 四、参考资料
 
 [1] [内参标定板](./resources/chess_board.png)
 
@@ -57,4 +59,5 @@ Livox Horizon 激光雷达 + Hikvision 相机
 
 [4] [OpenCV 张正友标定法](https://blog.csdn.net/dcrmg/article/details/52929669)
 
-[5] [livox-viewer 手动标定外参](https://github.com/Livox-SDK/Livox-SDK/wiki/Calibrate-extrinsic-and-display-under-ros-cn)
+[5] [livox手动标定外参](https://github.com/Livox-SDK/Livox-SDK/wiki/Calibrate-extrinsic-and-display-under-ros-cn)
+
