@@ -47,7 +47,7 @@ Livox Horizon 激光雷达 + Hikvision 相机
 
 6. 用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解。
 
-**注意：**除了以上基本的手动3D-2D激光雷达配准算法外，业界还探究了许多(半)自动式配准算法，见[笔记](./docs/Lidar-camera-calibration.ipynb)
+**补充**:除了以上基本的手动3D-2D激光雷达配准算法外，业界还探究了许多(半)自动式配准算法，见[笔记](./docs/Lidar-camera-calibration.ipynb)
 
 ## 四、参考资料
 
