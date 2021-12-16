@@ -9,14 +9,14 @@
   ./ROS 下是对图像流进行截图(snapShot.cpp)和交互提取特征点(show_coordinate)的节点脚本
 
 * 依赖
-  `PCL`, `OpenCV`
+  `PCL`, `OpenCV`, `Eigen`, `Ceres`
 
 
 ## 二、硬件
 Livox Horizon 激光雷达 + Hikvision 相机
 
 ## 三、介绍
-激光雷达和相机之间标定需要标定相机的内参、畸变系数和相机相对于激光雷达的位姿。下面是一种先标定相机内参、畸变系数；在矫正图像后，再手动提取角点进行3D-2D匹配的标定方法，具体步骤如下：
+激光雷达和相机标定假定相机内参、畸变系数已知，只需求相机相对于激光雷达的位姿。下面是最简单的手动对标记物提取角点进行3D-2D匹配的标定方法，具体步骤如下：
 
 1. 用张正友标定法标定相机内参和畸变系数，通过Matlab或者OpenCV等标定工具得到(cal_extrinsic.cpp中calib::zhang_zhengyou_calib函数)，实验中OpenCV的重投影误差比MatLab配准工具箱小。
    
@@ -44,9 +44,9 @@ Livox Horizon 激光雷达 + Hikvision 相机
 
   
 
-6. 用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解。
+6. 用OpenCV的SolvePnp函数(cal_calib函数)进行外参求解;或者使用固定三维点的非线性最小二乘BA优化进行外参求解(Ceres_PnP.cpp)。
 
-**补充：**激光雷达和相机标定方法有两种分类方式，第一种根据是否有人为介入进行划分，第二种按照是否有标定目标进行划分。见doc文件夹下的笔记或参考资料[6]。
+**补充：**doc文件夹下的笔记。
 
 ## 四、参考资料
 

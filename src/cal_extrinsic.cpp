@@ -4,8 +4,8 @@
 // linux
 #include <sys/io.h>
 
-namespace calib {
-
+namespace calib 
+{
 	void cal_extrinsic_par()
 	{
 		double dist[5] = { -0.1942, 0.0140, -5.358e-4, 0.0016, 0.
@@ -45,6 +45,7 @@ namespace calib {
 
 		cv::Mat rvec;
 		cv::Mat tvec;
+		// 使用opencv提供的PnP算法
 		cv::solvePnP(mat_3d, mat_2d, Int, dist_array, rvec, tvec);
 		cv::Mat rotM;
 		Rodrigues(rvec, rotM);
@@ -53,6 +54,12 @@ namespace calib {
 		std::cout << "rotM = " << rotM << std::endl;
 
 	};
+
+	void ceres_solve_pnp(){
+		
+
+
+	}
 
 	// void zhang_zhengyou_calib(const char * folder_address) 
 	// {
